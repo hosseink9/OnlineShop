@@ -14,4 +14,9 @@ import jwt,datetime
 from .models import User
 from .serializers import UserSerializer,UserVerifySerializer
 
-# Create your views here.
+
+def generate_2fa(request):  # NOTE: This is not a view
+    request.session["2FA"] = random.randint(1000, 9999)
+    request.session["2fa_expire"] = (timezone.now() + timedelta(minutes=1)).strftime("%d/%m/%Y, %H:%M:%S")
+    print(f"generated:{request.session['2FA']}  until:{request.session['2fa_expire']}")
+    return request
