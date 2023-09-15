@@ -37,3 +37,18 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self.create_user(phone, password, **other_fields)
+
+
+class PhoneNumberField(models.CharField):
+    def get_prep_value(self, value):
+        if value is None:
+            return value
+
+        try:
+            regex = phone_validator(value)
+        except ValidationError:
+            raise
+
+        phone_parts = regex.groupdict()
+        phone = phone_parts["operator"]+phone_parts["middle3"]+phone_parts["last4"]
+        return phone
