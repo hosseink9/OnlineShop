@@ -20,3 +20,12 @@ def generate_2fa(request):  # NOTE: This is not a view
     request.session["2fa_expire"] = (timezone.now() + timedelta(minutes=1)).strftime("%d/%m/%Y, %H:%M:%S")
     print(f"generated:{request.session['2FA']}  until:{request.session['2fa_expire']}")
     return request
+
+
+
+class RegisterView(APIView):
+    def post(self, request):
+        user_serializer = UserSerializer(data=request.data)
+        user_serializer.is_valid(raise_exception=True)
+        user_serializer.save()
+        return Response(user_serializer.data, status=status.HTTP_201_CREATED)
