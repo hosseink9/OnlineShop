@@ -55,6 +55,13 @@ class PhoneNumberField(models.CharField):
 
 
 
+class Address(BaseModel):
+    address = models.TextField()
+
+    def __str__(self):
+        return self.address
+
+
 class User(AbstractBaseUser,PermissionsMixin, BaseModel):
     phone = PhoneNumberField(validators=[phone_validator], unique=True, max_length=20)
 
@@ -65,6 +72,8 @@ class User(AbstractBaseUser,PermissionsMixin, BaseModel):
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+
+    address = models.ForeignKey(Address,on_delete=models.CASCADE)
 
     objects = UserManager()
 
