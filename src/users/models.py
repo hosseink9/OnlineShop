@@ -52,3 +52,24 @@ class PhoneNumberField(models.CharField):
         phone_parts = regex.groupdict()
         phone = phone_parts["operator"]+phone_parts["middle3"]+phone_parts["last4"]
         return phone
+
+
+
+class User(AbstractBaseUser,PermissionsMixin, BaseModel):
+    phone = PhoneNumberField(validators=[phone_validator], unique=True, max_length=20)
+
+    username = models.CharField(max_length=50,unique=True)
+    email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = 'phone'
+    REQUIRED_FIELDS = []
+
+    def __str__(self):
+        return f"{self.phone}"
