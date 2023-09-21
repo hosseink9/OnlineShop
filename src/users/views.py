@@ -24,75 +24,20 @@ class SendOTPView(APIView):
             return Response (data={'message':"200"})
 
 
-class LoginView(APIView):
+class VerifyOTP(APIView):
 
     def post(self, request):
-        phone = request.data['phone']
-        password = request.data['password']
-
-        user = User.objects.filter(phone=phone).first()
-
-        if user is None:
-            raise AuthenticationFailed('User is not found')
-
-        if not user.check_password(password):
-            raise AuthenticationFailed('Password is not correct')
-
-        payload = {
-            'id': user.id,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
-            'iat': datetime.datetime.utcnow()
-        }
-
-        token = jwt.encode(payload, 'secret',algorithm='HS256')
-
-        response = Response()
-
-        response.set_cookie(key='jwt', value=token, httponly=True)
-        response.data = {
-            'jwt':token
-            }
-
-        update_last_login(None, user)
-        return response
+        serliazer=LoginOTPSerializer(data=request.data, context={'request':request})
+        if serliazer.is_valid(raise_exception=True):
+            user=User.objects.get(phone=request.session.get('phone'))
+            access_token=user.get_access_token()
+            refresh_token=user.get_refresh_token()
+            return Response(data={'message':"success", "AT":access_token, "RT":refresh_token})
 
 
-class UserVerifyView(APIView):
+class LoginRequiredView(APIView):
+    authentication_classes = [JwtAuthentication]
+    permission_classes=[IsAuthenticated]
 
     def get(self, request):
-        if (not self.expiration_time) or (
-            timezone.now() > timezone.datetime.strptime(self.expiration_time, "%d/%m/%Y, %H:%M:%S")
-        ):
-            request = generate_2fa(request)
-        else:
-            print(f"previous:{self.generated_otp}  until:{self.expiration_time}")
-        return super().get(request)
-
-    def post(self, request):
-        if not all([self.generated_otp,self.expiration_time]):
-            return Response("panel:user_verify")
-        if timezone.now() > timezone.datetime.strptime(self.expiration_time, "%d/%m/%Y, %H:%M:%S"):
-            print("expired")
-            self.request = generate_2fa(request)
-            form = self.get_form()
-            form.add_error("otp", "Previous 2FA code expired. A new code has been sent to you")
-            return self.form_invalid(form)
-        else:
-            form = self.get_form()
-            if form.is_valid():
-                return self.form_valid(form)
-            return self.form_invalid(form)
-
-    def form_valid(self, form):
-        entered_otp = form.clean().get('otp')
-        if entered_otp == str(self.generated_otp):
-            self.request.session.pop('2FA')
-            self.request.session.pop('2fa_expire')
-            self.request.session["authenticated"] = True
-            user = User.objects.get(phone=self.user_phone)
-            login(self.request, user, "users.auth.UserAuthBackend")
-            self.request.session['phone'] = user.phone
-            return super().form_valid(form)
-        else:
-            form.add_error("otp","Invalid code entered")
-            return self.form_invalid(form)
+        return Response({'message':"success","phone":request.user.phone})
