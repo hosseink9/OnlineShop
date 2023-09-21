@@ -1,8 +1,11 @@
 from rest_framework import serializers
 
 from .models import User
-
-class UserSerializer(serializers.ModelSerializer):
+from django.contrib.auth import authenticate, get_user_model
+from django.utils.translation import gettext_lazy as _
+import random
+from datetime import timedelta
+from django.utils import timezone
     class Meta:
         model = User
         fields = ['username','first_name','last_name','email','phone','password']
