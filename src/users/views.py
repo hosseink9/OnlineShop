@@ -7,6 +7,15 @@ from .auth import JwtAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 class RegisterView(APIView):
+
+    def post(self, request):
+        serializer=SerializerRegisterUser(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data)
+
+
+
     def post(self, request):
         user_serializer = UserSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
