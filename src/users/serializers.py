@@ -21,5 +21,28 @@ class SerializerRegisterUser(serializers.ModelSerializer):
             instance.save()
             return instance
 
-class UserVerifySerializer(serializers.Serializer):
-    otp = serializers.CharField(max_length=4)
+
+class SerializerLogin(serializers.Serializer):
+
+    phone = serializers.CharField(required=True, allow_null=False)
+
+
+    def validate(self, data):
+        phone = data.get('phone')
+
+        if not User.objects.filter(phone=phone).exists():
+            raise serializers.ValidationError
+
+
+
+        return data
+
+    @staticmethod
+    def create_otp(request, phone):
+        request.session["otp"] = random.randint(1000, 9999)
+        request.session["otp_expire"] = (timezone.now() + timedelta(minutes=10)).strftime("%d/%m/%Y, %H:%M:%S")
+        request.session['phone']=phone
+        print(f"generated:{request.session['otp']}  until:{request.session['otp_expire']}")
+
+
+
