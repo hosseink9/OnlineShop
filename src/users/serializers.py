@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from .models import User
 from django.contrib.auth import authenticate, get_user_model
 from django.utils.translation import gettext_lazy as _
@@ -44,5 +43,19 @@ class SerializerLogin(serializers.Serializer):
         request.session['phone']=phone
         print(f"generated:{request.session['otp']}  until:{request.session['otp_expire']}")
 
+
+
+class LoginOTPSerializer(serializers.Serializer):
+    otp=serializers.IntegerField(required=True, allow_null=False)
+
+    def validate(self, data):
+        otp=data.get('otp')
+        request=self.context.get('request')
+        if not otp==request.session.get('otp'):
+            raise serializers.ValidationError
+        if not User.objects.filter(phone=request.session.get('phone')).exists():
+            raise serializers.ValidationError
+
+        return data
 
 
