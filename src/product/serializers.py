@@ -8,3 +8,7 @@ class ProductListSerializer(serializers.ModelSerializer):
         model=Product
         fields=['name','description','price','quantity','image','category']
 
+
+
+class SearchProductSerializer(serializers.Serializer):
+    name=serializers.CharField()
