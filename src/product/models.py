@@ -9,7 +9,7 @@ class Category(BaseModel):
     image = models.ImageField(null=True,blank=True)
 
     def __str__(self):
-        return self.name
+        return self.title
 
 
 class Product(BaseModel):
@@ -17,8 +17,8 @@ class Product(BaseModel):
     price = models.DecimalField(decimal_places=2, max_digits=5)
     quantity = models.IntegerField()
     description = models.TextField()
-    image = models.ImageField(null=True,blank=True)
-    category = models.ForeignKey(Category,on_delete=models.CASCADE)
+    images = models.ImageField(null=True,blank=True)
+    categories = models.ForeignKey(Category,on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
