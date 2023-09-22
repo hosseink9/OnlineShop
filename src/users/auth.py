@@ -1,6 +1,12 @@
 from django.contrib.auth.backends import BaseBackend
 from .models import User
 
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+
+from .utils import JwtHelper
+from config.settings import SECRET_KEY
+from .models import User
 
 
 class UserAuthBackend(BaseBackend):
