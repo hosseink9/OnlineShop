@@ -17,3 +17,14 @@ class ProductListView(APIView):
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+class SearchProductView(APIView):
+    def post(self, request):
+        serializer=SearchProductSerializer(data=request.data)
+        if serializer.is_valid():
+            products=Product.objects.filter(name__contains= serializer.data.get('name'))
+            if products:
+                serializer = ProductListSerializer(products, many=True)
+                return Response(serializer.data)
+            return Response (status=status.HTTP_404_NOT_FOUND)
+
+
